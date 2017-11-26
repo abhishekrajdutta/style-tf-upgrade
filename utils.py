@@ -24,6 +24,6 @@ def save_images(input, paths):
     images = input.data.clone().cpu()
     for n in range(N):
         image = images[n]
-        image = image.view(3, imsize, imsize)
+        image = image.view( 3,imsize, imsize)
         image = unloader(image)
         scipy.misc.imsave(paths[n], image)

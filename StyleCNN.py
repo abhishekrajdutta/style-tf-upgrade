@@ -1,8 +1,11 @@
 import torch.optim as optim
 import torchvision.models as models
+from torch.autograd import Variable
 
 # from modules.GramMatrix import *
 from GramMatrix import *
+
+dtype = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
 
 class StyleCNN(object):
     def __init__(self, style):
@@ -38,13 +41,15 @@ class StyleCNN(object):
                                                )
         self.gram = GramMatrix()
         self.loss = nn.MSELoss()
-        self.optimizer = optim.Adam(self.transform_network.parameters(), lr=1e-3)
-        
         self.use_cuda = torch.cuda.is_available()
         if self.use_cuda:
             self.loss_network=self.loss_network.cuda()
             self.loss=self.loss.cuda()
             self.gram=self.gram.cuda()
+            self.transform_network=self.transform_network.cuda()
+        self.optimizer = optim.Adam(self.transform_network.parameters(), lr=1e-3)
+        
+
 
 
 
@@ -52,11 +57,10 @@ class StyleCNN(object):
         self.optimizer.zero_grad()
 
         content = content.clone()
-        # content = content
+        content = Variable(content.clone().type(dtype))
         style = self.style.clone()
-        # style = self.style
         pastiche = self.transform_network.forward(content)
-
+        pastiche1=pastiche.clone()
         content_loss = 0
         style_loss = 0
 
@@ -65,10 +69,10 @@ class StyleCNN(object):
         for layer in list(self.loss_network.features):
             layer = not_inplace(layer)
             if self.use_cuda:
-                # print("CUDA!!!")
                 layer=layer.cuda()
 
             pastiche, content, style = layer.forward(pastiche), layer.forward(content), layer.forward(style)
+           
 
 
             if isinstance(layer, nn.Conv2d):
@@ -80,6 +84,7 @@ class StyleCNN(object):
                     pastiche_g, style_g = self.gram.forward(pastiche), self.gram.forward(style)
                     style_loss += self.loss(pastiche_g * self.style_weight, style_g.detach() * self.style_weight)
 
+
             if isinstance(layer, nn.ReLU):
                 i += 1
 
@@ -88,6 +93,6 @@ class StyleCNN(object):
 
         self.optimizer.step()
 
-        return self.pastiche
+        return content_loss,style_loss,pastiche1
 
     
