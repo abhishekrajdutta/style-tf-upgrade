@@ -3,7 +3,8 @@ import numpy as np
 import argparse
 
 parser = argparse.ArgumentParser(description='An fft-based descreen filter')
-# parser.add_argument('input')
+parser.add_argument('mode')
+parser.add_argument('--model', default="models/it0.pt")
 # parser.add_argument('output')
 parser.add_argument('--thresh', '-t', default=92, type=int,
                     help='Threshold level for normalized magnitude spectrum')
@@ -11,6 +12,9 @@ parser.add_argument('--radius', '-r', default=6, type=int,
                     help='Radius to expand the area of mask pixels')
 parser.add_argument('--middle', '-m', default=4, type=int,
                     help='Ratio for middle preservation')
+# parser.add_argument('--mode', '-v', default=4, type=int,
+#                     help='Ratio for version preservation')
+
 args = parser.parse_args()
 
 def normalize(h, w):

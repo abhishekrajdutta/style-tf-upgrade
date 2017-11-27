@@ -14,6 +14,13 @@ loader = transforms.Compose([
              transforms.ToTensor()
          ])
 
+##for face
+
+# loader = transforms.Compose([
+#              transforms.CenterCrop(imsize),
+#              transforms.ToTensor()
+#          ])
+
 unloader = transforms.ToPILImage()
 
 def image_loader(image_name):
