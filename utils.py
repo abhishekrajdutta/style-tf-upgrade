@@ -28,3 +28,11 @@ def save_images(input, paths):
         image = image.view( 3,imsize, imsize)
         image = unloader(image)
         scipy.misc.imsave(paths[n], image)
+
+  
+def save_image(input, paths):
+    image = input.data.clone().cpu()
+    # image = images
+    image = image.view( 3,imsize, imsize)
+    image = unloader(image)
+    scipy.misc.imsave(paths, image)

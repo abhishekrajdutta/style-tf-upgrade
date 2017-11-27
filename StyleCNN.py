@@ -110,4 +110,9 @@ class StyleCNN(object):
 
         return content_loss,style_loss,pastiche1
 
+
+    def test(self, content):
+    	pastiche = self.transform_network.forward(content)
+    	return pastiche
+
     
