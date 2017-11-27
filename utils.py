@@ -21,6 +21,7 @@ def image_loader(image_name):
   
 def save_images(input, paths):
     N = input.size()[0]
+    # print("help me")
     images = input.data.clone().cpu()
     for n in range(N):
         image = images[n]

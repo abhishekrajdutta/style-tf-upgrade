@@ -4,6 +4,12 @@ from torch.autograd import Variable
 
 # from modules.GramMatrix import *
 from GramMatrix import *
+from chainer import cuda, optimizers, serializers
+from chainer import Variable as vb
+import chainer.functions as F
+
+import numpy as np
+
 
 dtype = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
 
@@ -47,11 +53,17 @@ class StyleCNN(object):
             self.loss=self.loss.cuda()
             self.gram=self.gram.cuda()
             self.transform_network=self.transform_network.cuda()
-        self.optimizer = optim.Adam(self.transform_network.parameters(), lr=1e-3)
+        self.optimizer = optim.Adadelta(self.transform_network.parameters(), lr=1e-3)
         
 
-
-
+    def total_variation(self,x):
+      xp = cuda.get_array_module(x)
+      b, ch, h, w = x.shape
+      wh = vb(xp.asarray([[[[1], [-1]], [[0], [0]], [[0], [0]]], [[[0], [0]], [[1], [-1]], [[0], [0]]], [[[0], [0]], [[0], [0]], [[1], [-1]]]], dtype=np.float32))
+      ww = vb(xp.asarray([[[[1, -1]], [[0, 0]], [[0, 0]]], [[[0, 0]], [[1, -1]], [[0, 0]]], [[[0, 0]], [[0, 0]], [[1, -1]]]], dtype=np.float32))
+      return F.sum(F.convolution_2d(x, W=wh) ** 2).data + F.sum(F.convolution_2d(x, W=ww) ** 2).data
+      
+      
 
     def train(self, content):
         self.optimizer.zero_grad()
@@ -63,6 +75,7 @@ class StyleCNN(object):
         pastiche1=pastiche.clone()
         content_loss = 0
         style_loss = 0
+        variation_loss=0
 
         i = 1
         not_inplace = lambda layer: nn.ReLU(inplace=False) if isinstance(layer, nn.ReLU) else layer
@@ -88,7 +101,9 @@ class StyleCNN(object):
             if isinstance(layer, nn.ReLU):
                 i += 1
 
-        total_loss = content_loss + style_loss
+
+        pastiche2=pastiche1.data.cpu().numpy()
+        total_loss = content_loss + style_loss + (1e-6)*self.total_variation(pastiche2)
         total_loss.backward()
 
         self.optimizer.step()
