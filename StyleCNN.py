@@ -4,6 +4,7 @@ from torch.autograd import Variable
 
 # from modules.GramMatrix import *
 from GramMatrix import *
+from UpsampleConvLayer import *
 from chainer import cuda, optimizers, serializers
 from chainer import Variable as vb
 import chainer.functions as F
@@ -26,24 +27,57 @@ class StyleCNN(object):
         self.content_weight = 1
         self.style_weight = 1000
         self.loss_network = models.vgg19(pretrained=True)
+
+        
         
         self.transform_network = nn.Sequential(nn.ReflectionPad2d(40),
                                                nn.Conv2d(3, 32, 9, stride=1, padding=4),
+                                               nn.InstanceNorm2d(32, affine=True),
                                                nn.Conv2d(32, 64, 3, stride=2, padding=1),
+                                               nn.InstanceNorm2d(64, affine=True),
                                                nn.Conv2d(64, 128, 3, stride=2, padding=1),
+                                               nn.InstanceNorm2d(128, affine=True),
+
                                                nn.Conv2d(128, 128, 3, stride=1, padding=0),
+                                               nn.InstanceNorm2d(128, affine=True),
+                                               nn.ReLU(),
                                                nn.Conv2d(128, 128, 3, stride=1, padding=0),
+                                               nn.InstanceNorm2d(128, affine=True),
+
                                                nn.Conv2d(128, 128, 3, stride=1, padding=0),
+                                               nn.InstanceNorm2d(128, affine=True),
+                                               nn.ReLU(),
                                                nn.Conv2d(128, 128, 3, stride=1, padding=0),
+                                               nn.InstanceNorm2d(128, affine=True),
+
                                                nn.Conv2d(128, 128, 3, stride=1, padding=0),
+                                               nn.InstanceNorm2d(128, affine=True),
+                                               nn.ReLU(),
                                                nn.Conv2d(128, 128, 3, stride=1, padding=0),
+                                               nn.InstanceNorm2d(128, affine=True),
+
                                                nn.Conv2d(128, 128, 3, stride=1, padding=0),
+                                               nn.InstanceNorm2d(128, affine=True),
+                                               nn.ReLU(),
                                                nn.Conv2d(128, 128, 3, stride=1, padding=0),
+                                               nn.InstanceNorm2d(128, affine=True),
+
                                                nn.Conv2d(128, 128, 3, stride=1, padding=0),
+                                               nn.InstanceNorm2d(128, affine=True),
+                                               nn.ReLU(),
                                                nn.Conv2d(128, 128, 3, stride=1, padding=0),
-                                               nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1, output_padding=1),
-                                               nn.ConvTranspose2d(64, 32, 3, stride=2, padding=1, output_padding=1),
+                                               nn.InstanceNorm2d(128, affine=True),
+                                              
+                                               UpsampleConvLayer(128, 64, kernel_size=3, stride=1, upsample=2),
+                                               nn.InstanceNorm2d(64, affine=True),
+                                               nn.ReLU(),
+
+                                               UpsampleConvLayer(64, 32, kernel_size=3, stride=1, upsample=2),
+                                               nn.InstanceNorm2d(32, affine=True),
+                                               nn.ReLU(),
+                                               
                                                nn.Conv2d(32, 3, 9, stride=1, padding=4),
+                                               nn.ReLU()
                                                )
         self.gram = GramMatrix()
         self.loss = nn.MSELoss()
@@ -54,6 +88,8 @@ class StyleCNN(object):
             self.gram=self.gram.cuda()
             self.transform_network=self.transform_network.cuda()
         self.optimizer = optim.Adadelta(self.transform_network.parameters(), lr=1e-3)
+
+    
         
 
     def total_variation(self,x):

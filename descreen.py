@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 
 parser = argparse.ArgumentParser(description='An fft-based descreen filter')
-parser.add_argument('mode')
+parser.add_argument('mode',default="train")
 parser.add_argument('--model', default="models/it0.pt")
 # parser.add_argument('output')
 parser.add_argument('--thresh', '-t', default=92, type=int,
