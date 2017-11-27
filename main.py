@@ -3,6 +3,7 @@ import torchvision.datasets as datasets
 
 from StyleCNN import *
 from utils import *
+# from descreen import *
 
 # CUDA Configurations
 dtype = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
@@ -18,8 +19,9 @@ N = 1
 # print("LETSGO")
 kwargs = {'num_workers': 1} if torch.cuda.is_available() else {}
 
-train=1
-test=0
+train=0
+test=1
+
 
 def main(style,kwargs):
 	
@@ -61,7 +63,7 @@ def main(style,kwargs):
 
 	if test==1:
 		# style_cnn = StyleCNN(style)
-		style_cnn = torch.load('test.pt')
+		style_cnn = torch.load("models/it4500.pt")
 		pastiche=style_cnn.test(content)
 		path = "outputs/trained.png"
 		save_image(pastiche, path)

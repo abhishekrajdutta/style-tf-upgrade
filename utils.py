@@ -3,6 +3,9 @@ from torch.autograd import Variable
 
 from PIL import Image
 import scipy.misc
+import cv2
+import numpy as np
+from descreen import *
 
 imsize = 256
 
@@ -35,4 +38,7 @@ def save_image(input, paths):
     # image = images
     image = image.view( 3,imsize, imsize)
     image = unloader(image)
-    scipy.misc.imsave(paths, image)
+    image2=np.array(image)
+    image2 = image2[:, :, ::-1].copy() 
+    screen(image2,paths)
+    # scipy.misc.imsave(paths, image)
