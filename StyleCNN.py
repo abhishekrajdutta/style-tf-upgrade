@@ -87,7 +87,8 @@ class StyleCNN(object):
             self.loss=self.loss.cuda()
             self.gram=self.gram.cuda()
             self.transform_network=self.transform_network.cuda()
-        self.optimizer = optim.Adadelta(self.transform_network.parameters(), lr=1e-3)
+        # self.optimizer = optim.Adadelta(self.transform_network.parameters(), lr=1e-4)
+        self.optimizer = optim.Adam(self.transform_network.parameters(), lr=1e-4)
 
     
         
@@ -139,7 +140,7 @@ class StyleCNN(object):
 
 
         pastiche2=pastiche1.data.cpu().numpy()
-        total_loss = content_loss + style_loss + (1e-6)*self.total_variation(pastiche2)
+        total_loss = content_loss + style_loss + (0.5e-5)*self.total_variation(pastiche2)
         total_loss.backward()
 
         self.optimizer.step()

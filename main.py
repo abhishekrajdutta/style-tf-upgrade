@@ -9,13 +9,13 @@ from utils import *
 dtype = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
 
 # # Content and style
-# style = image_loader("testImages/style.jpg").type(dtype)
-# content = image_loader("testImages/content10.jpg").type(dtype)
-# pastiche = image_loader("testImages/content10.jpg").type(dtype)
-
-style = image_loader("testImages/picasso.jpg").type(dtype)
-content = image_loader("testImages/dancing.jpg").type(dtype)
-pastiche = image_loader("testImages/dancing.jpg").type(dtype)
+style = image_loader("testImages/style.jpg").type(dtype)
+content = image_loader("testImages/content10.jpg").type(dtype)
+pastiche = image_loader("testImages/content10.jpg").type(dtype)
+# 
+# style = image_loader("testImages/picasso.jpg").type(dtype)
+# content = image_loader("testImages/dancing.jpg").type(dtype)
+# pastiche = image_loader("testImages/dancing.jpg").type(dtype)
 pastiche.data = torch.randn(pastiche.data.size()).type(dtype)
 
 num_epochs = 3
@@ -30,9 +30,6 @@ elif args.mode=="test":
 	train=0
 	test=1
 
-# train=0
-# test=1	
-
 def main(style,kwargs):
 	
 	if train==1:
@@ -41,9 +38,9 @@ def main(style,kwargs):
 		
 
 		# Contents
-		coco = datasets.ImageFolder(root='images/coco/', transform=loader)
-		# faces = datasets.ImageFolder(root='images/faces/', transform=loader)
-		content_loader = torch.utils.data.DataLoader(coco, batch_size=N, shuffle=True,drop_last=True,pin_memory=True, **kwargs)
+		# coco = datasets.ImageFolder(root='images/coco/', transform=loader)
+		faces = datasets.ImageFolder(root='images/faces/', transform=loader)
+		content_loader = torch.utils.data.DataLoader(faces, batch_size=N, shuffle=True,drop_last=True,pin_memory=True, **kwargs)
 
 		for epoch in range(num_epochs):
 			for i, content_batch in enumerate(content_loader):
@@ -76,6 +73,8 @@ def main(style,kwargs):
 		# style_cnn = StyleCNN(style)
 		style_cnn = torch.load(args.model)
 		# style_cnn = torch.load("models/it3500.pt")
+		path = "outputs/content.png"
+		save_image(content, path)
 		pastiche=style_cnn.test(content)
 		path = "outputs/trained.png"
 		save_image(pastiche, path)
