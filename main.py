@@ -38,9 +38,9 @@ def main(style,kwargs):
 		
 
 		# Contents
-		# coco = datasets.ImageFolder(root='images/coco/', transform=loader)
-		faces = datasets.ImageFolder(root='images/faces/', transform=loader)
-		content_loader = torch.utils.data.DataLoader(faces, batch_size=N, shuffle=True,drop_last=True,pin_memory=True, **kwargs)
+		coco = datasets.ImageFolder(root='images/coco/', transform=loader)
+		# faces = datasets.ImageFolder(root='images/faces/', transform=loader)
+		content_loader = torch.utils.data.DataLoader(coco, batch_size=N, shuffle=True,drop_last=True,pin_memory=True, **kwargs)
 
 		for epoch in range(num_epochs):
 			for i, content_batch in enumerate(content_loader):

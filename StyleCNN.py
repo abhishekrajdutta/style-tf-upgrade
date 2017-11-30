@@ -79,8 +79,10 @@ class StyleCNN(object):
                                                nn.Conv2d(32, 3, 9, stride=1, padding=4),
                                                nn.ReLU()
                                                )
+                
         self.gram = GramMatrix()
         self.loss = nn.MSELoss()
+        
         self.use_cuda = torch.cuda.is_available()
         if self.use_cuda:
             self.loss_network=self.loss_network.cuda()
@@ -90,7 +92,9 @@ class StyleCNN(object):
         # self.optimizer = optim.Adadelta(self.transform_network.parameters(), lr=1e-4)
         self.optimizer = optim.Adam(self.transform_network.parameters(), lr=1e-4)
 
-    
+    # def mse_loss(self,input, target):
+    #       return torch.sum((input - target)^2) / input.data.nelement()
+
         
 
     def total_variation(self,x):
@@ -129,7 +133,7 @@ class StyleCNN(object):
                 name = "conv_" + str(i)
 
                 if name in self.content_layers:
-                    content_loss += self.loss(pastiche * self.content_weight, content.detach() * self.content_weight)
+                    content_loss += self.loss(pastiche * self.content_weight, content * self.content_weight)
                 if name in self.style_layers:
                     pastiche_g, style_g = self.gram.forward(pastiche), self.gram.forward(style)
                     style_loss += self.loss(pastiche_g * self.style_weight, style_g.detach() * self.style_weight)
