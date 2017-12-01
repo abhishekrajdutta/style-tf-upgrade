@@ -18,7 +18,7 @@ from utils import *
 dtype = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
 
 class ResCNN(object):
-    def __init__(self):
+    def __init__(self,norm):
         super(ResCNN, self).__init__()
         
         self.content_layers = ['relu_4']
@@ -59,6 +59,10 @@ class ResCNN(object):
 
                                                
                                               
+                                               # UpsampleConvLayer(64, 64, kernel_size=3, stride=1, upsample=2),
+                                               # nn.InstanceNorm2d(64, affine=True),
+                                               # nn.ReLU(),
+
                                                UpsampleConvLayer(64, 64, kernel_size=3, stride=1, upsample=2),
                                                nn.InstanceNorm2d(64, affine=True),
                                                nn.ReLU(),
@@ -72,14 +76,29 @@ class ResCNN(object):
                                                # nn.Tanh()
                                                )
 
+        if norm==0:         
+          for m in self.transform_network.modules():
+              if isinstance(m, nn.Conv2d):
+                  n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                  m.weight.data.normal_(0, math.sqrt(2. / n))
+              elif isinstance(m, nn.InstanceNorm2d):
+                  m.weight.data.fill_(1)
+                  m.bias.data.zero_()
+        elif norm==1:          
+              if isinstance(m, nn.Conv2d):
+                  n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                  m.weight.data.normal_(0, math.sqrt(2. / n))
+              elif isinstance(m, nn.InstanceNorm2d):
+                  m.weight.data.fill_(1/8.0)
+                  m.bias.data.zero_()
 
-        for m in self.transform_network.modules():
-            if isinstance(m, nn.Conv2d):
-                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, math.sqrt(2. / n))
-            elif isinstance(m, nn.InstanceNorm2d):
-                m.weight.data.fill_(1/64.0)
-                m.bias.data.zero_()
+        elif norm==2:          
+              if isinstance(m, nn.Conv2d):
+                  n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                  m.weight.data.normal_(0, math.sqrt(2. / n))
+              elif isinstance(m, nn.BatchNorm2d):
+                  m.weight.data.fill_(1/8.0)
+                  m.bias.data.zero_()
 
         self.loss = nn.MSELoss()
         self.use_cuda = torch.cuda.is_available()

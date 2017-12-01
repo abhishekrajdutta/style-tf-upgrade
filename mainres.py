@@ -22,7 +22,7 @@ elif args.mode=="test":
 def main(kwargs):
 	
 	if train==1:
-		res_cnn = ResCNN()		
+		res_cnn = ResCNN(args.norm)		
 
 		# Contents
 		coco = datasets.ImageFolder(root='images/coco10k/', transform=loader)
@@ -42,7 +42,7 @@ def main(kwargs):
 				  print("Content loss: %f" % (content_loss.data[0]))
 				  # print("Style loss: %f" % (style_loss.data[0]))
 
-				if i % 250 == 0:
+				if i % 2000 == 0:
 				  path = "outputsr/%d_" % (iteration)
 				  paths = [path + str(n) + ".png" for n in range(N)]
 				  # print(pastiches.size())				
